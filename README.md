@@ -4,30 +4,19 @@ Windows-API-Code-Pack-1.1
 README
 ======
 
-NuGet packages (recommended)
-----------------------------
-
-https://www.nuget.org/packages/WindowsAPICodePack-Core/
-
-https://www.nuget.org/packages/WindowsAPICodePack-Shell/
-
-https://www.nuget.org/packages/WindowsAPICodePack-ShellExtensions/
-
-https://www.nuget.org/packages/WindowsAPICodePack-DirectX/
-
-https://www.nuget.org/packages/WindowsAPICodePack-ExtendedLinguisticServices/
-
-https://www.nuget.org/packages/WindowsAPICodePack-Sensors/
+This is a fork of the Microsoft © Windows API Code Pack, based on a repository created by [Aybe](/aybe/Windows-API-Code-Pack-1.1).
+Specifically created for use in [Forge](https://fhir.furore.com/forge/), the official HL7 [FHIR](https://www.hl7.org/fhir/) profile authoring tool.
+Provides additional bug fixes and custom improvements.
 
 Licence
 -------
 
-See [LICENCE](https://github.com/aybe/Windows-API-Code-Pack-1.1/blob/master/LICENCE) for the original licence (retrieved from [WebArchive](http://web.archive.org/web/20130717101016/http://archive.msdn.microsoft.com/WindowsAPICodePack/Project/License.aspx)). The library is not developed anymore by Microsoft and seems to have been left as 'free to use'. A clarification or update about the licence terms from Microsoft is welcome, however.
+See [LICENCE](LICENCE) for the original licence (retrieved from [WebArchive](http://web.archive.org/web/20130717101016/http://archive.msdn.microsoft.com/WindowsAPICodePack/Project/License.aspx)). The library is not developed anymore by Microsoft and seems to have been left as 'free to use'. A clarification or update about the licence terms from Microsoft is welcome, however.
  
 Release notes
 -------------
 
-See [CHANGELOG](https://github.com/aybe/Windows-API-Code-Pack-1.1/blob/master/CHANGELOG) for latest changes.
+See [CHANGELOG](CHANGELOG) for latest changes.
 
 Bugs
 ----
