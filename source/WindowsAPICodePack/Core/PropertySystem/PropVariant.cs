@@ -214,9 +214,16 @@ namespace MS.WindowsAPICodePack.Internal
         // pointer. The valueDataExt field provides this, as well as
         // the last 4-bytes of an 8-byte value on 32-bit
         // architectures.
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources")]
-        [FieldOffset(12)]
+
+        // https://stackoverflow.com/questions/28076941/c-sharp-windowsapicodepack-propertysystem-accessviolationexception
+        // https://github.com/aybe/Windows-API-Code-Pack-1.1/pull/5
+        // Issue #4: Fixed the pointer size to ensure proper memory access
+        // [FieldOffset(12)]
+        [FieldOffset(16)]
         IntPtr _ptr2;
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources")]
         [FieldOffset(8)]
         IntPtr _ptr;
