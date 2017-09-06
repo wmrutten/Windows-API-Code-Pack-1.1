@@ -4,7 +4,7 @@ Windows-API-Code-Pack-1.1
 README
 ======
 
-This is a fork of the Microsoft © Windows API Code Pack, based on a repository created by [Aybe](/aybe/Windows-API-Code-Pack-1.1).
+This is a fork of the Microsoft © Windows API Code Pack, based on a repository created by [Aybe](https://github.com/aybe/Windows-API-Code-Pack-1.1).
 Specifically created for use in [Forge](https://fhir.furore.com/forge/), the official HL7 [FHIR](https://www.hl7.org/fhir/) profile authoring tool.
 Provides additional bug fixes and custom improvements.
 
