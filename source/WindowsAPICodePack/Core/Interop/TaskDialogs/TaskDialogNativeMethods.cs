@@ -71,9 +71,9 @@ namespace Microsoft.WindowsAPICodePack.Dialogs
         [StructLayout(LayoutKind.Explicit, CharSet = CharSet.Auto)]
         internal struct IconUnion
         {
-            internal IconUnion(int i)
+            internal IconUnion(IntPtr i)
             {
-                mainIcon = new IntPtr(i);
+                mainIcon = i;
             }
 
             [FieldOffset(0)]
