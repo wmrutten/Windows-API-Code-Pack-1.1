@@ -52,7 +52,7 @@ namespace Microsoft.WindowsAPICodePack.Dialogs
         {
             return string.Format(CultureInfo.CurrentCulture, "{0}{1}{2}",
                 Text ?? string.Empty,
-                (!string.IsNullOrEmpty(Text) && !string.IsNullOrEmpty(instruction)) ? Environment.NewLine : string.Empty,
+                (!string.IsNullOrEmpty(Text) && !string.IsNullOrEmpty(instruction)) ? "\n" : string.Empty,
                 instruction ?? string.Empty);
         }
     }
