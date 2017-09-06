@@ -1,6 +1,9 @@
 ﻿using System.Windows;
 using System.Windows.Interop;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using System;
+using System.IO;
+using Microsoft.WindowsAPICodePack.Shell;
 
 namespace TestApp
 {
@@ -71,5 +74,72 @@ namespace TestApp
                     break;
             }
         }
+
+        private void ButtonBrowseFolder_Click(object sender, RoutedEventArgs e)
+        {
+            using (var dlg = new CommonOpenFileDialog()
+            {
+                IsFolderPicker = true
+            })
+            {
+                dlg.FolderChanging += BrowseFolderDialog_FolderChanging;
+                dlg.SelectionChanged += BrowseFolderDialog_SelectionChanged;
+                dlg.FileOk += BrowseFolderDialog_FileOk;
+                if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                    MessageBox.Show("You selected: " + dlg.FileName);
+                }
+                dlg.SelectionChanged -= BrowseFolderDialog_SelectionChanged;
+                dlg.FolderChanging -= BrowseFolderDialog_FolderChanging;
+                dlg.FileOk -= BrowseFolderDialog_FileOk;
+            };
+        }
+
+        static bool IsEqualOrSubfolderOf(string path, string other)
+        {
+            if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(other)) { return false; }
+            var l1 = path.Length;
+            var l2 = other.Length;
+            if (l2 == l1)
+            {
+                // return StringComparer.OrdinalIgnoreCase.Equals(l1, l2);
+                return String.Compare(path, 0, other, 0, l1, StringComparison.OrdinalIgnoreCase) == 0;
+            }
+            else if (l2 > l1)
+            {
+                return String.Compare(path, 0, other, 0, l1, StringComparison.OrdinalIgnoreCase) == 0
+                    && other[l1] == Path.DirectorySeparatorChar;
+            }
+            return false;
+        }
+
+        private void BrowseFolderDialog_FolderChanging(object sender, CommonFileDialogFolderChangeEventArgs e)
+        {
+            e.Cancel = IsEqualOrSubfolderOf(KnownFolders.Documents.Path, e.Folder);
+            if (e.Cancel)
+            {
+                FolderSelection.Text = "NOT ALLOWED!";
+            }
+        }
+
+        private void BrowseFolderDialog_SelectionChanged(object sender, EventArgs e)
+        {
+            var dlg = (CommonOpenFileDialog)sender;
+            FolderSelection.Text = dlg?.SelectedFileName
+                + Environment.NewLine
+                + string.Join("|", dlg.SelectedFileNames);
+        }
+
+        private void BrowseFolderDialog_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            var dlg = (CommonOpenFileDialog)sender;
+            e.Cancel = IsEqualOrSubfolderOf(KnownFolders.Documents.Path, dlg.SelectedFileName);
+            if (e.Cancel)
+            {
+                FolderSelection.Text = "NOT ALLOWED!";
+            }
+        }
+
+
     }
 }

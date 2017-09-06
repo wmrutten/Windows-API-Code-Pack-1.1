@@ -19,6 +19,7 @@
                 <Style TargetType="TextBlock">
                     <Setter Property="TextWrapping" Value="Wrap" />
                     <Setter Property="TextAlignment" Value="Center" />
+                    <Setter Property="VerticalAlignment" Value="Center"/>
                 </Style>
             </WrapPanel.Resources>
             <Button Click="ButtonTaskDialogIconFix_Click">
@@ -32,6 +33,13 @@
                     <TextBlock Text="TaskDialog custom button close fix" />
                 </Button.Content>
             </Button>
+            <Button Click="ButtonBrowseFolder_Click">
+                <Button.Content>
+                    <TextBlock Text="Browse Folder" />
+                </Button.Content>
+            </Button>
+            <TextBlock Text="Current selection: " />
+            <TextBlock x:Name="FolderSelection" />
         </WrapPanel>
     </Grid>
 </Window>

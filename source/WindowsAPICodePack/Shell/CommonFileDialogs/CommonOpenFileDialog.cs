@@ -114,6 +114,70 @@ namespace Microsoft.WindowsAPICodePack.Dialogs
             get { return allowNonFileSystem; }
             set { allowNonFileSystem = value; }
         }
+
+        /// <summary>
+        /// Gets a collection of currently selected items as ShellObjects when the dialog is open.
+        /// Returns empty collection when the dialog is closed.
+        /// </summary>
+        /// <value>A collection of <see cref="Microsoft.WindowsAPICodePack.Shell.ShellObject"></see> instances.</value>
+        public ICollection<ShellObject> SelectedFilesAsShellObject
+        {
+            get
+            {
+                if (NativeDialogShowing)
+                {
+                    // temp collection to hold our shellobjects
+                    IShellItemArray ppsai;
+                    openDialogCoClass.GetSelectedItems(out ppsai);
+                    uint cnt = 0;
+                    ppsai.GetCount(out cnt);
+                    if (cnt > 0)
+                    {
+                        var resultItems = new ShellObject[cnt];
+                        for (uint i = 0; i < cnt; i++)
+                        {
+                            IShellItem ppsi;
+                            ppsai.GetItemAt(i, out ppsi);
+                            resultItems[i] = ShellObjectFactory.Create(ppsi);
+                        }
+                        return resultItems;
+                    }
+                }
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Gets the currently selected filenames when the dialog is open.
+        /// Returns empty sequence when the dialog is closed.
+        /// </summary>
+        public IEnumerable<string> SelectedFileNames
+        {
+            get
+            {
+                if (NativeDialogShowing)
+                {
+                    // temp collection to hold our shellobjects
+                    IShellItemArray ppsai;
+                    openDialogCoClass.GetSelectedItems(out ppsai);
+                    uint cnt = 0;
+                    ppsai.GetCount(out cnt);
+                    if (cnt > 0)
+                    {
+                        string[] resultItems = new string[cnt];
+                        for (uint i = 0; i < cnt; i++)
+                        {
+                            IShellItem ppsi;
+                            ppsai.GetItemAt(i, out ppsi);
+                            resultItems[i] = GetFileNameFromShellItem(ppsi);
+                        }
+                        return resultItems;
+                    }
+                }
+                return null;
+            }
+        }
+
         #endregion
 
         internal override IFileDialog GetNativeFileDialog()

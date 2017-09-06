@@ -655,6 +655,44 @@ namespace Microsoft.WindowsAPICodePack.Dialogs
         /// </summary>
         public string DefaultFileName { get; set; }
 
+        /// <summary>
+        /// Gets the currently selected item as a ShellObject when the dialog is open.
+        /// Returns <c>null</c> when the dialog is closed.
+        /// </summary>
+        /// <value>A <see cref="Microsoft.WindowsAPICodePack.Shell.ShellObject"></see> object.</value>
+        public ShellObject SelectedFileAsShellObject
+        {
+            get
+            {
+                if (NativeDialogShowing)
+                {
+                    IShellItem ppsi;
+                    nativeDialog.GetCurrentSelection(out ppsi);
+                    return ShellObjectFactory.Create(ppsi);
+                }
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Gets the currently selected filename when the dialog is open.
+        /// Returns <c>null</c> when the dialog is closed.
+        /// </summary>
+        /// <value>A string value.</value>
+        public string SelectedFileName
+        {
+            get
+            {
+                if (NativeDialogShowing)
+                {
+                    IShellItem ppsi;
+                    nativeDialog.GetCurrentSelection(out ppsi);
+                    return GetFileNameFromShellItem(ppsi);
+                }
+                return null;
+            }
+        }
+
         #endregion
 
         #region Configuration
@@ -1001,7 +1039,7 @@ namespace Microsoft.WindowsAPICodePack.Dialogs
               "Items list empty - shouldn't happen unless dialog canceled or not yet shown.");
         }
 
-        private bool NativeDialogShowing
+        protected bool NativeDialogShowing
         {
             get
             {
