@@ -596,13 +596,28 @@ namespace Microsoft.WindowsAPICodePack.Dialogs
                 }
 
                 // Clean up the button and radio button arrays, if any.
+                var buttonType = typeof(TaskDialogNativeMethods.TaskDialogButton);
+                var buttonTypeSize = Marshal.SizeOf(buttonType);
+
                 if (buttonArray != IntPtr.Zero)
                 {
+                    for (int i = 0; i < settings.Buttons.Length; ++i)
+                    {
+                        IntPtr curItem = new IntPtr(buttonArray.ToInt64() + i * buttonTypeSize);
+                        Marshal.DestroyStructure(curItem, typeof(TaskDialogNativeMethods.TaskDialogButton));
+                    }
+
                     Marshal.FreeHGlobal(buttonArray);
                     buttonArray = IntPtr.Zero;
                 }
                 if (radioButtonArray != IntPtr.Zero)
                 {
+                    for (int i = 0; i < settings.RadioButtons.Length; ++i)
+                    {
+                        IntPtr curItem = new IntPtr(radioButtonArray.ToInt64() + i * buttonTypeSize);
+                        Marshal.DestroyStructure(curItem, typeof(TaskDialogNativeMethods.TaskDialogButton));
+                    }
+
                     Marshal.FreeHGlobal(radioButtonArray);
                     radioButtonArray = IntPtr.Zero;
                 }
