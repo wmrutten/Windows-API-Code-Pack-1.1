@@ -4,6 +4,7 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.IO;
 using Microsoft.WindowsAPICodePack.Shell;
+using System.Runtime.InteropServices;
 
 namespace TestApp
 {
@@ -79,7 +80,8 @@ namespace TestApp
         {
             using (var dlg = new CommonOpenFileDialog()
             {
-                IsFolderPicker = true
+                IsFolderPicker = true,
+                EnsureFileExists = true
             })
             {
                 dlg.FolderChanging += BrowseFolderDialog_FolderChanging;
