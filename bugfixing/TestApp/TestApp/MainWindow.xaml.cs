@@ -5,6 +5,8 @@ using System;
 using System.IO;
 using Microsoft.WindowsAPICodePack.Shell;
 using System.Runtime.InteropServices;
+using Microsoft.WindowsAPICodePack.Dialogs.Controls;
+using System.Diagnostics;
 
 namespace TestApp
 {
@@ -76,14 +78,29 @@ namespace TestApp
             }
         }
 
+        const string ID_LABEL = "ID_LABEL";
+        const string ID_CHECK = "ID_CHECK";
+
         private void ButtonBrowseFolder_Click(object sender, RoutedEventArgs e)
         {
             using (var dlg = new CommonOpenFileDialog()
             {
                 IsFolderPicker = true,
-                EnsureFileExists = true
+                EnsureFileExists = true,
+                InitialDirectoryShellContainer =
+                    // Is there an easier way ???
+                    ShellContainer.FromParsingName(KnownFolders.Documents.ParsingName) as ShellFolder
             })
             {
+                var chk = new CommonFileDialogCheckBox(ID_CHECK, "");
+                chk.Text = "#" + chk.Id + ": Include subfolders";
+                dlg.Controls.Add(chk);
+
+                var lbl = new CommonFileDialogLabel(ID_LABEL, "");
+                lbl.Text = "#" + lbl.Id + ": Selection is valid?";
+                dlg.Controls.Add(lbl);
+
+                dlg.DialogOpening += BrowseFolderDialog_DialogOpening;
                 dlg.FolderChanging += BrowseFolderDialog_FolderChanging;
                 dlg.SelectionChanged += BrowseFolderDialog_SelectionChanged;
                 dlg.FileOk += BrowseFolderDialog_FileOk;
@@ -91,8 +108,9 @@ namespace TestApp
                 {
                     MessageBox.Show("You selected: " + dlg.FileName);
                 }
-                dlg.SelectionChanged -= BrowseFolderDialog_SelectionChanged;
+                dlg.DialogOpening -= BrowseFolderDialog_DialogOpening;
                 dlg.FolderChanging -= BrowseFolderDialog_FolderChanging;
+                dlg.SelectionChanged -= BrowseFolderDialog_SelectionChanged;
                 dlg.FileOk -= BrowseFolderDialog_FileOk;
             };
         }
@@ -115,13 +133,49 @@ namespace TestApp
             return false;
         }
 
+        const int IDOK = 1;
+        const int IDCANCEL = 2;
+        const int IDABORT = 3;
+        const int IDRETRY = 4;
+        const int IDIGNORE = 5;
+        const int IDYES = 6;
+        const int IDNO = 7;
+        // #if (WINVER >= 0x0400)
+        const int IDCLOSE = 8;
+        const int IDHELP = 9;
+        // #endif /* WINVER >= 0x0400 */
+
+        void toggleSelectButton(CommonOpenFileDialog dlg, bool enabled)
+        {
+            if (dlg != null)
+            {
+                var btn = dlg.DefaultButton;
+                btn.Enabled = false;
+            }
+        }
+
+        private void BrowseFolderDialog_DialogOpening(object sender, EventArgs e)
+        {
+            //var dlg = (CommonOpenFileDialog)sender;
+            //toggleSelectButton(dlg, false);
+        }
+
         private void BrowseFolderDialog_FolderChanging(object sender, CommonFileDialogFolderChangeEventArgs e)
         {
-            e.Cancel = IsEqualOrSubfolderOf(KnownFolders.Documents.Path, e.Folder);
+            e.Cancel = !IsEqualOrSubfolderOf(KnownFolders.Documents.Path, e.Folder);
             if (e.Cancel)
             {
                 FolderSelection.Text = "NOT ALLOWED!";
             }
+
+            var dlg = (CommonOpenFileDialog)sender;
+            var lbl = dlg.Controls[ID_LABEL] as CommonFileDialogLabel;
+            if (lbl != null)
+            {
+                lbl.Text = e.Cancel ? "Error! Please select (a subfolder of) your personal My Documents folder." : "";
+                toggleSelectButton(dlg, !e.Cancel);
+            }
+
         }
 
         private void BrowseFolderDialog_SelectionChanged(object sender, EventArgs e)
@@ -132,16 +186,56 @@ namespace TestApp
                 + string.Join("|", dlg.SelectedFileNames);
         }
 
+        // TODO: verify x32/x64 ...
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        static extern IntPtr GetDlgItem(IntPtr hwnd, int childID);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        static extern int EnableWindow(IntPtr hwnd, int bEnable);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        static extern int IsWindowEnabled(IntPtr hwnd);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        static extern IntPtr GetWindow(IntPtr hWnd, int cmd);
+
+        // The retrieved handle identifies the child window at the top of the Z order, if the specified window is a parent window; otherwise, the retrieved handle is NULL.The function examines only child windows of the specified window.It does not examine descendant windows.
+        const int GW_CHILD = 5;
+
+        // The retrieved handle identifies the enabled popup window owned by the specified window (the search uses the first such window found using GW_HWNDNEXT); otherwise, if there are no enabled popup windows, the retrieved handle is that of the specified window.
+        const int GW_ENABLEDPOPUP = 6;
+
+        // The retrieved handle identifies the window of the same type that is highest in the Z order.
+        // If the specified window is a topmost window, the handle identifies a topmost window.If the specified window is a top-level window, the handle identifies a top-level window. If the specified window is a child window, the handle identifies a sibling window.
+        const int GW_HWNDFIRST = 0;
+
+        // The retrieved handle identifies the window of the same type that is lowest in the Z order.
+        // If the specified window is a topmost window, the handle identifies a topmost window. If the specified window is a top-level window, the handle identifies a top-level window. If the specified window is a child window, the handle identifies a sibling window.
+        const int GW_HWNDLAST = 1;
+
+        // The retrieved handle identifies the window below the specified window in the Z order.
+        const int GW_HWNDNEXT = 2;
+
+        // If the specified window is a topmost window, the handle identifies a topmost window. If the specified window is a top-level window, the handle identifies a top-level window. If the specified window is a child window, the handle identifies a sibling window.
+        // If the specified window is a topmost window, the handle identifies a topmost window. If the specified window is a top-level window, the handle identifies a top-level window. If the specified window is a child window, the handle identifies a sibling window.
+        const int GW_HWNDPREV = 3;
+
+        // The retrieved handle identifies the specified window's owner window, if any. For more information, see Owned Windows.
+        const int GW_OWNER = 4;
+
         private void BrowseFolderDialog_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
         {
             var dlg = (CommonOpenFileDialog)sender;
-            e.Cancel = IsEqualOrSubfolderOf(KnownFolders.Documents.Path, dlg.SelectedFileName);
+            e.Cancel = !IsEqualOrSubfolderOf(KnownFolders.Documents.Path, dlg.SelectedFileName);
             if (e.Cancel)
             {
                 FolderSelection.Text = "NOT ALLOWED!";
             }
         }
-
 
     }
 }
