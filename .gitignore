@@ -232,3 +232,6 @@ $RECYCLE.BIN/
 
 # Windows help files
 *.chw
+
+# Visual Studio temp folder
+.vs
