@@ -241,7 +241,7 @@
     <Compile Include="CommonFileDialogs\CommonFileDialogProminentControl.cs" />
     <Compile Include="CommonFileDialogs\CommonFileDialogRadioButtonList.cs" />
     <Compile Include="CommonFileDialogs\CommonFileDialogResult.cs" />
-    <Compile Include="CommonFileDialogs\CommonFileDialogSeperator.cs" />
+    <Compile Include="CommonFileDialogs\CommonFileDialogSeparator.cs" />
     <Compile Include="CommonFileDialogs\CommonFileDialogStandardFilters.cs" />
     <Compile Include="CommonFileDialogs\CommonFileDialogTextBox.cs" />
     <Compile Include="CommonFileDialogs\CommonOpenFileDialog.cs" />
