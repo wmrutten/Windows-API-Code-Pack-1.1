@@ -149,6 +149,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommonFileDialogs\CommonFileDialogDefaultControl.cs" />
     <Compile Include="Common\EnumUnknown.cs" />
     <Compile Include="Common\EventHandlerExtensionMethods.cs" />
     <Compile Include="Common\NativePoint.cs" />

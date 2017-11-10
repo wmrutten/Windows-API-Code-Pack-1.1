@@ -81,6 +81,11 @@ namespace Microsoft.WindowsAPICodePack.Dialogs.Controls
         protected CommonFileDialogControl() { }
 
         /// <summary>
+        /// Creates a new instance of this class for a default dialog control with the specified ID
+        /// </summary>
+        protected CommonFileDialogControl(int id) : base(id) { }
+
+        /// <summary>
         /// Creates a new instance of this class with the text.
         /// </summary>
         /// <param name="text">The text of the common file dialog control.</param>

@@ -14,6 +14,11 @@ namespace Microsoft.WindowsAPICodePack.Dialogs
         private static int nextId = DialogsDefaults.MinimumDialogControlId;
 
         /// <summary>
+        /// Creates a new instance of a dialog control with the specified ID
+        /// </summary>
+        protected DialogControl(int id) { Id = id; }
+
+        /// <summary>
         /// Creates a new instance of a dialog control
         /// </summary>
         protected DialogControl()
