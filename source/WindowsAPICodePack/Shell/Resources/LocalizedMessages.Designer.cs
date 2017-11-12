@@ -187,6 +187,15 @@ namespace Microsoft.WindowsAPICodePack.Shell.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Index was outside the bounds of the CommonFileDialogDefaultButton.
+        /// </summary>
+        internal static string DefaultButtonIndexOutsideBounds {
+            get {
+                return ResourceManager.GetString("DefaultButtonIndexOutsideBounds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Custom controls cannot be removed from a File dialog once added..
         /// </summary>
         internal static string DialogControlCollectionCannotRemoveControls {

@@ -108,6 +108,13 @@ namespace TestApp
 
                 dlg.Controls.Add(grp);
 
+                var defButton = dlg.DefaultButton;
+                // defButton.Text = "Ok";
+                var item1 = new CommonFileDialogDropDownItem("Select");
+                var item2 = new CommonFileDialogDropDownItem("Delete");
+                defButton.Items.Add(item1);
+                defButton.Items.Add(item2);
+
                 // TODO expose IFileDialogCustomize.EnableOpenDropDown
                 // https://social.msdn.microsoft.com/Forums/windowsdesktop/en-US/5890ff0d-8432-42bf-a52b-1b772d873d40/ifiledialogcustomize-edit-box-label-and-preferred-length?forum=windowsuidevelopment
                 //   There is no FILEOPENDIALOGOPTIONS equivalent to OPENFILENAME.OFN_READONLY or OFN_HIDEREADONLY.
@@ -122,7 +129,7 @@ namespace TestApp
                 dlg.FileOk += BrowseFolderDialog_FileOk;
                 if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
                 {
-                    MessageBox.Show("You selected: " + dlg.FileName);
+                    MessageBox.Show("You selected: " + dlg.FileName + "\r\nButton index: " + defButton.SelectedIndex);
                 }
                 dlg.DialogOpening -= BrowseFolderDialog_DialogOpening;
                 dlg.FolderChanging -= BrowseFolderDialog_FolderChanging;
@@ -153,8 +160,8 @@ namespace TestApp
         {
             if (dlg != null)
             {
-                var btn = dlg.GetOkButton();
-                btn.Enabled = false;
+                var btn = dlg.DefaultButton;
+                btn.Enabled = enabled;
             }
         }
 

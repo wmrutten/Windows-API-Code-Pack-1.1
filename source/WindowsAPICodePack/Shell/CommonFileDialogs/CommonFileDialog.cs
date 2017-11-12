@@ -609,6 +609,12 @@ namespace Microsoft.WindowsAPICodePack.Dialogs
             ApplyNativeSettings(nativeDialog);
             InitializeEventSink(nativeDialog);
 
+            if (defaultButton != null)
+            {
+                GetCustomizedFileDialog();
+                defaultButton.Attach(customize);
+            }
+
             // Clear user data if Reset has been called 
             // since the last show.
             if (resetSelections)
@@ -693,19 +699,43 @@ namespace Microsoft.WindowsAPICodePack.Dialogs
             }
         }
 
+        private IntPtr hWnd;
+
         /// <summary>
         /// Gets the window handle of the dialog when it is open, or <see cref="IntPtr.Zero"/> otherwise.
         /// </summary>
-        public IntPtr GetHandle()
+        public IntPtr Handle
         {
-            var w = nativeDialog as IOleWindow;
-            if (w != null)
+            get
             {
-                IntPtr hWnd;
-                w.GetWindow(out hWnd);
+                if (hWnd == IntPtr.Zero)
+                {
+                    var w = nativeDialog as IOleWindow;
+                    if (w != null)
+                    {
+                        w.GetWindow(out hWnd);
+                    }
+                }
                 return hWnd;
             }
-            return IntPtr.Zero;
+        }
+
+        private CommonFileDialogDefaultButton defaultButton;
+
+        /// <summary>
+        /// Gets the dialog default button (Open/Select/Save).
+        /// </summary>
+        public CommonFileDialogDefaultButton DefaultButton
+        {
+            get
+            {
+                if (defaultButton == null)
+                {
+                    defaultButton = new CommonFileDialogDefaultButton();
+                    defaultButton.HostingDialog = this;
+                }
+                return defaultButton;
+            }
         }
 
         #endregion
@@ -721,7 +751,8 @@ namespace Microsoft.WindowsAPICodePack.Dialogs
                 || SelectionChanged != null
                 || FileTypeChanged != null
                 || DialogOpening != null
-                || (controls != null && controls.Count > 0))
+                || (controls != null && controls.Count > 0)
+                || defaultButton != null)
             {
                 uint cookie;
                 nativeEventSink = new NativeDialogEventSink(this);
@@ -935,7 +966,124 @@ namespace Microsoft.WindowsAPICodePack.Dialogs
                 throw new ArgumentNullException("control");
             }
 
-            CommonFileDialogControl dialogControl;
+#if true
+            switch (propertyName)
+            {
+                case "Text":
+                    applyText(control);
+                    break;
+                case "Visible":
+                    applyVisible(control);
+                    break;
+                case "Enabled":
+                    applyEnabled(control);
+                    break;
+                case "SelectedIndex":
+                    applySelectedIndex(control);
+                    break;
+                case "IsChecked":
+                    applyIsChecked(control);
+                    break;
+            }
+
+            // Local helper methods
+            void applyText(DialogControl ctl)
+            {
+                if (ctl is CommonFileDialogTextBox textBox)
+                {
+                    customize.SetEditBoxText(control.Id, textBox.Text);
+                }
+                else if (ctl is CommonFileDialogLabel label)
+                {
+                    customize.SetControlLabel(control.Id, label.Text);
+                }
+                else if (ctl is CommonFileDialogDefaultControl def)
+                {
+                    var hWnd = def.GetHandle();
+                    if (hWnd != IntPtr.Zero)
+                    {
+                        DialogNativeMethods.SetWindowText(hWnd, def.Text);
+                    }
+                }
+            }
+
+            void applyVisible(DialogControl ctl)
+            {
+                if (ctl is CommonFileDialogDefaultControl def)
+                {
+                    var hWnd = def.GetHandle();
+                    if (hWnd != IntPtr.Zero)
+                    {
+                        DialogNativeMethods.ShowWindow(
+                            hWnd,
+                            def.Visible ? DialogNativeMethods.ShowWindowCommands.SW_SHOW : DialogNativeMethods.ShowWindowCommands.SW_HIDE);
+                    }
+                }
+                else if (ctl is CommonFileDialogControl dialog)
+                {
+                    ShellNativeMethods.ControlState state;
+                    customize.GetControlState(control.Id, out state);
+
+                    if (dialog.Visible == true)
+                    {
+                        state |= ShellNativeMethods.ControlState.Visible;
+                    }
+                    else if (dialog.Visible == false)
+                    {
+                        state &= ~ShellNativeMethods.ControlState.Visible;
+                    }
+                    customize.SetControlState(control.Id, state);
+                }
+            }
+
+            void applyEnabled(DialogControl ctl)
+            {
+                if (ctl is CommonFileDialogDefaultControl def)
+                {
+                    var hWnd = def.GetHandle();
+                    if (hWnd != IntPtr.Zero)
+                    {
+                        DialogNativeMethods.EnableWindow(hWnd, def.Enabled ? 1 : 0);
+                    }
+                }
+                else if (ctl is CommonFileDialogControl dialog)
+                {
+                    ShellNativeMethods.ControlState state;
+                    customize.GetControlState(control.Id, out state);
+
+                    if (dialog.Enabled == true)
+                    {
+                        state |= ShellNativeMethods.ControlState.Enable;
+                    }
+                    else if (dialog.Enabled == false)
+                    {
+                        state &= ~ShellNativeMethods.ControlState.Enable;
+                    }
+
+                    customize.SetControlState(control.Id, state);
+                }
+            }
+
+            void applySelectedIndex(DialogControl ctl)
+            {
+                if (ctl is CommonFileDialogRadioButtonList list)
+                {
+                    customize.SetSelectedControlItem(list.Id, list.SelectedIndex);
+                }
+                else if (control is CommonFileDialogComboBox box)
+                {
+                    customize.SetSelectedControlItem(box.Id, box.SelectedIndex);
+                }
+            }
+
+            void applyIsChecked(DialogControl ctl)
+            {
+                if (ctl is CommonFileDialogCheckBox checkBox)
+                {
+                    customize.SetCheckButtonState(checkBox.Id, checkBox.IsChecked);
+                }
+            }
+#else
             if (propertyName == "Text")
             {
                 CommonFileDialogTextBox textBox = control as CommonFileDialogTextBox;
@@ -1009,6 +1157,7 @@ namespace Microsoft.WindowsAPICodePack.Dialogs
                     customize.SetCheckButtonState(checkBox.Id, checkBox.IsChecked);
                 }
             }
+#endif
         }
 
         #endregion
@@ -1188,6 +1337,13 @@ namespace Microsoft.WindowsAPICodePack.Dialogs
         /// <param name="e">The event data.</param>
         protected virtual void OnOpening(EventArgs e)
         {
+            var btn = defaultButton;
+            if (btn != null)
+            {
+                btn.SyncText();
+                //btn.SyncValue();
+            }
+
             EventHandler handler = DialogOpening;
             if (handler != null)
             {
@@ -1221,6 +1377,12 @@ namespace Microsoft.WindowsAPICodePack.Dialogs
                     // Make sure all custom properties are sync'ed
                     if (parent.Controls != null)
                     {
+                        var defButton = parent.defaultButton;
+                        if (defButton != null)
+                        {
+                            defButton.SyncValue();
+                        }
+
                         foreach (CommonFileDialogControl control in parent.Controls)
                         {
                             CommonFileDialogTextBox textBox;
