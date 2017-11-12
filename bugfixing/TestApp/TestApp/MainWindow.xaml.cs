@@ -78,6 +78,7 @@ namespace TestApp
             }
         }
 
+        const string ID_GROUP = "ID_GROUP";
         const string ID_LABEL = "ID_LABEL";
         const string ID_CHECK = "ID_CHECK";
 
@@ -92,13 +93,28 @@ namespace TestApp
                     ShellContainer.FromParsingName(KnownFolders.Documents.ParsingName) as ShellFolder
             })
             {
+                var grp = new CommonFileDialogGroupBox(ID_GROUP, "");
+                grp.Text = "#" + grp.Id + " Custom options";
+
                 var chk = new CommonFileDialogCheckBox(ID_CHECK, "");
                 chk.Text = "#" + chk.Id + ": Include subfolders";
-                dlg.Controls.Add(chk);
+                // dlg.Controls.Add(chk);
+                grp.Items.Add(chk);
 
                 var lbl = new CommonFileDialogLabel(ID_LABEL, "");
                 lbl.Text = "#" + lbl.Id + ": Selection is valid?";
-                dlg.Controls.Add(lbl);
+                // dlg.Controls.Add(lbl);
+                grp.Items.Add(lbl);
+
+                dlg.Controls.Add(grp);
+
+                // TODO expose IFileDialogCustomize.EnableOpenDropDown
+                // https://social.msdn.microsoft.com/Forums/windowsdesktop/en-US/5890ff0d-8432-42bf-a52b-1b772d873d40/ifiledialogcustomize-edit-box-label-and-preferred-length?forum=windowsuidevelopment
+                //   There is no FILEOPENDIALOGOPTIONS equivalent to OPENFILENAME.OFN_READONLY or OFN_HIDEREADONLY.
+                //   IFileDialogCustomize::EnableOpenDropDown must be called.
+                //   "Open" and "Open Read-Only" control items must be added using AddControlItem.
+                //   Then GetSelectedControlItem must be called to get the choice made after the return from Show(). 
+                //   IFileDialogCustomize does not support a ListBox.  Even if it did, its width would not be controllable.
 
                 dlg.DialogOpening += BrowseFolderDialog_DialogOpening;
                 dlg.FolderChanging += BrowseFolderDialog_FolderChanging;
@@ -133,31 +149,19 @@ namespace TestApp
             return false;
         }
 
-        const int IDOK = 1;
-        const int IDCANCEL = 2;
-        const int IDABORT = 3;
-        const int IDRETRY = 4;
-        const int IDIGNORE = 5;
-        const int IDYES = 6;
-        const int IDNO = 7;
-        // #if (WINVER >= 0x0400)
-        const int IDCLOSE = 8;
-        const int IDHELP = 9;
-        // #endif /* WINVER >= 0x0400 */
-
         void toggleSelectButton(CommonOpenFileDialog dlg, bool enabled)
         {
             if (dlg != null)
             {
-                var btn = dlg.DefaultButton;
+                var btn = dlg.GetOkButton();
                 btn.Enabled = false;
             }
         }
 
         private void BrowseFolderDialog_DialogOpening(object sender, EventArgs e)
         {
-            //var dlg = (CommonOpenFileDialog)sender;
-            //toggleSelectButton(dlg, false);
+            var dlg = (CommonOpenFileDialog)sender;
+            // ...
         }
 
         private void BrowseFolderDialog_FolderChanging(object sender, CommonFileDialogFolderChangeEventArgs e)

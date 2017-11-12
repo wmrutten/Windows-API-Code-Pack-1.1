@@ -126,23 +126,6 @@ namespace Microsoft.WindowsAPICodePack.Dialogs
             get { return controls; }
         }
 
-        /// <summary>
-        /// Gets the dialog default button control.
-        /// </summary>
-        public CommonFileDialogDefaultControl DefaultButton => GetDefaultControl(DialogNativeMethods.DialogCommonControlIds.Ok);
-
-        /// <summary>
-        /// Gets the dialog cancel button control.
-        /// </summary>
-        public CommonFileDialogDefaultControl CancelButton => GetDefaultControl(DialogNativeMethods.DialogCommonControlIds.Cancel);
-
-        private CommonFileDialogDefaultControl GetDefaultControl(DialogNativeMethods.DialogCommonControlIds id)
-        {
-            var control = new CommonFileDialogDefaultControl((int)id);
-            control.HostingDialog = this;
-            return control;
-        }
-
         private CommonFileDialogFilterCollection filters;
         /// <summary>
         /// Gets the filters used by the dialog.
@@ -967,37 +950,42 @@ namespace Microsoft.WindowsAPICodePack.Dialogs
                     customize.SetControlLabel(control.Id, label.Text);
                 }
             }
-            else if (propertyName == "Visible" && (dialogControl = control as CommonFileDialogControl) != null)
+            else if (propertyName == "Visible")
             {
-                ShellNativeMethods.ControlState state;
-                customize.GetControlState(control.Id, out state);
-
-                if (dialogControl.Visible == true)
+                if ((dialogControl = control as CommonFileDialogControl) != null)
                 {
-                    state |= ShellNativeMethods.ControlState.Visible;
-                }
-                else if (dialogControl.Visible == false)
-                {
-                    state &= ~ShellNativeMethods.ControlState.Visible;
-                }
+                    ShellNativeMethods.ControlState state;
+                    customize.GetControlState(control.Id, out state);
 
-                customize.SetControlState(control.Id, state);
+                    if (dialogControl.Visible == true)
+                    {
+                        state |= ShellNativeMethods.ControlState.Visible;
+                    }
+                    else if (dialogControl.Visible == false)
+                    {
+                        state &= ~ShellNativeMethods.ControlState.Visible;
+                    }
+                    customize.SetControlState(control.Id, state);
+                }
             }
-            else if (propertyName == "Enabled" && (dialogControl = control as CommonFileDialogControl) != null)
+            else if (propertyName == "Enabled")
             {
-                ShellNativeMethods.ControlState state;
-                customize.GetControlState(control.Id, out state);
-
-                if (dialogControl.Enabled == true)
+                if ((dialogControl = control as CommonFileDialogControl) != null)
                 {
-                    state |= ShellNativeMethods.ControlState.Enable;
-                }
-                else if (dialogControl.Enabled == false)
-                {
-                    state &= ~ShellNativeMethods.ControlState.Enable;
-                }
+                    ShellNativeMethods.ControlState state;
+                    customize.GetControlState(control.Id, out state);
 
-                customize.SetControlState(control.Id, state);
+                    if (dialogControl.Enabled == true)
+                    {
+                        state |= ShellNativeMethods.ControlState.Enable;
+                    }
+                    else if (dialogControl.Enabled == false)
+                    {
+                        state &= ~ShellNativeMethods.ControlState.Enable;
+                    }
+
+                    customize.SetControlState(control.Id, state);
+                }
             }
             else if (propertyName == "SelectedIndex")
             {
